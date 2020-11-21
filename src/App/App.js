@@ -1,5 +1,12 @@
 import React from 'react';
+import firebase from 'firebase/app';
+
+import fbConnection from '../helpers/data/connection';
+
+import auth from '../components/auth';
 import './App.scss';
+
+fbConnection();
 
 class App extends React.Component {
   render() {

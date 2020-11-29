@@ -1,6 +1,7 @@
 import axios from 'axios';
+import boardData from './boardData';
 
-const baseUrl = 'https://fir-cows-958ae.firebaseio.com/pinterest-webpack';
+const baseUrl = 'https://react-pinterest-106f8.firebaseio.com/';
 
 const getBoardPins = (boardId) => new Promise((resolve, reject) => {
   axios.get(`${baseUrl}/pins-boards.json?orderBy="boardId"&equalTo="${boardId}"`).then((response) => {
@@ -14,4 +15,76 @@ const getPin = (pinId) => new Promise((resolve, reject) => {
   }).catch((error) => reject(error));
 });
 
-export { getBoardPins, getPin };
+const getAllUserPins = (uid) => new Promise((resolve, reject) => {
+  console.warn("I'm calling allUserpins");
+  axios
+    .get(`${baseUrl}/pins.json?orderBy="UserId"&equalTo="${uid}"`).then((response) => {
+      resolve(Object.values(response.data));
+    })
+    .catch((error) => reject(error));
+});
+
+const createPin = (pinObj) => new Promise((resolve, reject) => {
+  axios
+    .post(`${baseUrl}/pins.json`, pinObj)
+    .then((response) => {
+      axios.patch(`${baseUrl}/pins/${response.data.name}.json`, { firebaseKey: response.data.name }).then((patchResponse) => {
+        resolve(patchResponse);
+      }).catch((error) => reject(error));
+    });
+});
+
+const getPublicPins = () => new Promise((resolve, reject) => {
+  axios.get(`${baseUrl}/pins.json?orderBy="private"&equalTo="false"`).then((response) => {
+    resolve(Object.values(response.data));
+  }).catch((error) => reject(error));
+});
+
+// const deletePin = (firebaseKey) => axios.delete(`${baseUrl}/pins/${firebaseKey}.json`);
+
+const deletePin = (pinId) => axios.delete(`${baseUrl}/pins/${pinId}.json`)
+  .then(() => {
+    axios.get(`${baseUrl}/pins-boards.json?orderBy="pinId"&equalTo="${pinId}"`)
+      .then((response) => {
+        const responseArray = Object.values(response);
+        responseArray.forEach((respArr) => {
+          const pinBoardIdsArray = Object.keys(respArr);
+          pinBoardIdsArray.forEach((id) => {
+            boardData.deletePinBoard(id);
+          });
+        });
+      });
+  });
+
+const updatePin = (pinObj) => new Promise((resolve, reject) => {
+  axios
+    .patch(`${baseUrl}/pins/${pinObj.firebaseKey}.json`, pinObj)
+    .then((response) => {
+      resolve(response);
+    }).catch((error) => reject(error));
+});
+
+const getPinBoardToDelete = (pinId) => new Promise((resolve, reject) => {
+  axios.get(`${baseUrl}/pins-boards.json?orderBy="pinId"&equalTo="${pinId}"`)
+    .then((response) => {
+      const responseArray = Object.values(response);
+      responseArray.forEach((respArr) => {
+        const pinBoardIdsArray = Object.keys(respArr);
+        pinBoardIdsArray.forEach((id) => {
+          boardData.deletePinBoard(id);
+        });
+      });
+    });
+});
+
+// eslint-disable-next-line import/no-anonymous-default-export
+export default {
+  getBoardPins,
+  getPin,
+  getAllUserPins,
+  createPin,
+  getPublicPins,
+  deletePin,
+  updatePin,
+  getPinBoardToDelete,
+};

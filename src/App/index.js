@@ -2,13 +2,11 @@ import React from 'react';
 import firebase from 'firebase/app';
 import { BrowserRouter as Router } from 'react-router-dom';
 import fbConnection from '../helpers/data/connection';
-import MyNavbar from '../components/myNavbar';
 import Routes from '../helpers/Routes';
+import MyNavbar from '../components/myNavbar';
+// import Auth from '../components/auth';
+// import BoardContainer from '../components/BoardContainer';
 
-// import { patchFBBoardkeys, patchFBPinkeys } from '../helpers/data/patchFBkeys';
-
-// patchFBBoardkeys();
-// patchFBPinkeys();
 fbConnection();
 
 class App extends React.Component {
@@ -33,12 +31,12 @@ class App extends React.Component {
   render() {
     const { user } = this.state;
     return (
-      <div className='App'>
-        <Router>
-          <MyNavbar user={user}/>
-          <Routes user={user} />
-        </Router>
-      </div>
+    <div className='App'>
+      <Router>
+        <MyNavbar user={user} />
+        <Routes user={user} />
+      </Router>
+    </div>
     );
   }
 }
